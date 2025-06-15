@@ -11,13 +11,13 @@ assets/                  # Static assets (images, icons, etc.)
 catboost_info/           # CatBoost model training logs and info
 data/
   telco_train.csv        # Training data
-  telco_test.csv         # Test data
 Document/
   Churn_pred_doc.docx    # Project documentation (Word)
   Churn_pred_doc.pdf     # Project documentation (PDF)
 models/                  # Saved ML models and preprocessing objects
 pages/                   # Streamlit multipage app scripts
-testing_data/            # Additional test datasets
+testing_data/            # test datasets
+  telco_test.csv         # Test data
 utils/                   # Utility scripts and helpers
 ```
 
