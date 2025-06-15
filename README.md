@@ -15,6 +15,12 @@ Document/
   Churn_pred_doc.pdf     # Project documentation (PDF)
 models/                  # Saved ML models and preprocessing objects
 pages/                   # Streamlit multipage app scripts
+  1_Problem_Statement.py
+  2_Data_Description.py
+  3_Data_Visualization.py
+  4_Feature_Engineering.py
+  5_Model_Development.py
+  6_Upload_and_Predict.py
 testing_data/            # test datasets
   telco_test.csv         # Test data
 utils/                   # Utility scripts and helpers
