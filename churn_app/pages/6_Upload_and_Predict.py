@@ -5,7 +5,7 @@ import os
 import joblib
 from sklearn.metrics import accuracy_score, roc_auc_score, roc_curve, auc
 import plotly.graph_objs as go
-
+import uuid 
 # ----------- Utility Functions -----------
 
 def fade_in_markdown(text):
@@ -73,7 +73,7 @@ if uploaded_file and predict_button:
         df_processed = df_processed.reindex(columns=train_dummy_cols, fill_value=0)
 
         # ---------------- Tabs ----------------
-        summary_tab, prediction_tab = st.tabs(["📄 Summary", "🧠 All Predictions"])
+        summary_tab, prediction_tab, viz_tab = st.tabs(["📄 Summary", "🧠 All Predictions", "📊 Data Visualization"])
 
         with summary_tab:
             st.write("💾 **Data Overview (First 5 Rows)**")
@@ -152,8 +152,56 @@ if uploaded_file and predict_button:
                                            data=df_result.to_csv(index=False),
                                            file_name=f"{file.replace('.pkl', '')}_predictions.csv",
                                            mime="text/csv")
+            
                     except Exception as e:
                         st.warning(f"⚠️ Error loading/predicting with model {file}: {e}")
+                        
+            with viz_tab:
+                if best_prediction_df is not None:
+                    df_viz = best_prediction_df.copy()
+                elif model_preds:
+                    df_viz = list(model_preds.values())[0].copy()
+                else:
+                    st.warning("⚠️ No predictions found for visualization.")
+                    st.stop()
 
+                st.subheader("📈 Numerical Feature vs. Churn Prediction")
+
+                num_features = ['tenure', 'MonthlyCharges', 'TotalCharges']
+                for col in num_features:
+                    if col in df_viz.columns:
+                        fig = go.Figure()
+                        fig.add_trace(go.Box(y=df_viz[df_viz["Churn Prediction"] == 0][col],
+                                            name="No Churn", marker_color="green"))
+                        fig.add_trace(go.Box(y=df_viz[df_viz["Churn Prediction"] == 1][col],
+                                            name="Churn", marker_color="red"))
+                        fig.update_layout(title=f"{col} vs Churn Prediction",
+                                        yaxis_title=col,
+                                        template="plotly_white")
+                        st.plotly_chart(fig, use_container_width=True)
+
+                    st.subheader("📊 Category Feature-wise Churn Breakdown")
+
+                    cat_features = ['Contract', 'InternetService', 'PaymentMethod', 'SeniorCitizen', 'gender']
+                    for i, col in enumerate(cat_features):
+                        if col in df_viz.columns:
+                            grouped = df_viz.groupby([col, 'Churn Prediction']).size().reset_index(name='Count')
+                            pivoted = grouped.pivot(index=col, columns='Churn Prediction', values='Count').fillna(0)
+                            pivoted.columns = ['No Churn', 'Churn'] if 0 in pivoted.columns and 1 in pivoted.columns else pivoted.columns
+
+                            fig = go.Figure()
+                            fig.add_trace(go.Bar(name='No Churn', x=pivoted.index.astype(str), y=pivoted.get('No Churn', 0), marker_color='green'))
+                            fig.add_trace(go.Bar(name='Churn', x=pivoted.index.astype(str), y=pivoted.get('Churn', 0), marker_color='red'))
+
+                            fig.update_layout(barmode='group',
+                                            title=f"Churn vs No Churn by {col}",
+                                            xaxis_title=col,
+                                            yaxis_title="Customer Count",
+                                            template="plotly_white")
+
+                            # ✅ Unique key per chart
+                            st.plotly_chart(fig, use_container_width=True, key=f"{col}_churn_bar_{uuid.uuid4()}")
+            
+            # if model_scores:
     except Exception as e:
         st.error(f"❌ Unexpected error: {e}")
