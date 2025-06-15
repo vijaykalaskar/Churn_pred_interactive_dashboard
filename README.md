@@ -12,7 +12,6 @@ catboost_info/           # CatBoost model training logs and info
 data/
   telco_train.csv        # Training data
 Document/
-  Churn_pred_doc.docx    # Project documentation (Word)
   Churn_pred_doc.pdf     # Project documentation (PDF)
 models/                  # Saved ML models and preprocessing objects
 pages/                   # Streamlit multipage app scripts
